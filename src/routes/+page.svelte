@@ -1,7 +1,5 @@
 <script lang="ts">
   import { t, setLocale, type Locale, locale } from "$lib";
-
-  $inspect(locale);
 </script>
 
 <label>
