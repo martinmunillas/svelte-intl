@@ -1,130 +1,203 @@
 import {
   parse,
   TYPE,
+  type ArgumentElement,
+  type LiteralElement,
   type MessageFormatElement,
+  type PluralElement,
+  type PluralOrSelectOption,
+  type SelectElement,
 } from "@formatjs/icu-messageformat-parser";
 import { format } from "./format";
+import { type Snippet, createRawSnippet } from "svelte";
 
-export type Replacements = Record<string, string | number | Date>;
+export type Replacement = string | number | Date | Snippet<[Snippet]>;
+export type Replacements = Record<string, Replacement>;
 
-const executeElement = (
+export const literal = (element: LiteralElement) => {
+  return element.value;
+};
+
+export const argument = (
+  element: ArgumentElement,
+  replacement?: Replacement
+) => {
+  return replacement?.toString() || element.value;
+};
+
+export const number = (
+  locale: string,
+  replacement?: Replacement,
+  parentValue?: Replacement
+) => {
+  const value = parentValue || replacement;
+  if (!(typeof value === "number")) {
+    throw "";
+  }
+  return format.number(locale, value);
+};
+export const date = (
+  locale: string,
+  replacement?: Replacement,
+  parentValue?: Replacement
+) => {
+  const value = parentValue || replacement;
+  if (!(value instanceof Date)) {
+    throw "";
+  }
+  return format.dateTime(locale, value);
+};
+
+export const time = (
+  locale: string,
+  replacement?: Replacement,
+  parentValue?: Replacement
+) => {
+  const value = parentValue || replacement;
+  if (!(value instanceof Date)) {
+    throw "";
+  }
+  return format.dateTime(locale, value, { timeStyle: "short" });
+};
+
+export const select = (element: SelectElement, replacement?: Replacement) => {
+  if (typeof replacement != "string") {
+    throw "";
+  }
+  return element.options[replacement || "other"] || element.options["other"];
+};
+
+export const plural = (
+  locale: string,
+  element: PluralElement,
+  replacement?: Replacement
+) => {
+  let option: PluralOrSelectOption | undefined;
+  if (element.pluralType === "ordinal") {
+    const rule =
+      typeof replacement === "number"
+        ? new Intl.PluralRules(locale, {
+            type: element.pluralType,
+          }).select(replacement)
+        : "other";
+    option = element.options[rule];
+  } else {
+    for (const rule of Object.keys(element.options)) {
+      if (rule === "other") {
+        option = element.options[rule];
+        break;
+      }
+      const match = /(<|<=|>=|>|=|!=)(\d+)/.exec(rule);
+      if (typeof replacement !== "number") {
+        throw "";
+      }
+      if (!match) {
+        continue;
+      }
+      const operation = {
+        "=": replacement === Number(match[2]),
+        "<=": replacement <= Number(match[2]),
+        "<": replacement < Number(match[2]),
+        ">=": replacement >= Number(match[2]),
+        ">": replacement > Number(match[2]),
+        "!=": replacement != Number(match[2]),
+      };
+      if (operation[match[1] as keyof typeof operation]) {
+        option = element.options[rule];
+        break;
+      }
+    }
+  }
+  if (!option) {
+    throw "";
+  }
+  return option;
+};
+
+export const pound = (
+  locale: string,
+  replacement?: Replacement,
+  parentValue?: Replacement
+) => {
+  const value = parentValue || replacement;
+  if (typeof value === "number") {
+    return format.number(locale, value);
+  }
+  if (value instanceof Date) {
+    return format.dateTime(locale, value);
+  }
+  return value?.toString() || "";
+};
+
+const executeMany = (
+  locale: string,
+  elements: MessageFormatElement[],
+  replacements?: Replacements,
+  parentValue?: Replacement
+): string => {
+  let result = "";
+  for (const element of elements) {
+    result += executeElement(locale, element, replacements, parentValue);
+  }
+  return result;
+};
+
+function executeElement(
   locale: string,
   element: MessageFormatElement,
   replacements?: Replacements,
-  parentValue?: number | string | Date
-): string => {
+  parentValue?: Replacement
+): string {
   // @ts-ignore
   const replacement = replacements?.[element.value || ""];
   switch (element.type) {
     case TYPE.literal: {
-      return element.value;
+      return literal(element);
     }
     case TYPE.argument: {
-      return replacement?.toString() || element.value;
+      return argument(element, replacement);
     }
     case TYPE.number: {
-      const value = parentValue || replacement;
-      if (!(typeof value === "number")) {
-        throw "";
-      }
-      return format.number(locale, value);
+      return number(locale, replacement, parentValue);
     }
     case TYPE.date: {
-      const value = parentValue || replacement;
-      if (!(value instanceof Date)) {
-        throw "";
-      }
-      return format.dateTime(locale, value);
+      return date(locale, replacement, parentValue);
     }
     case TYPE.time: {
-      const value = parentValue || replacement;
-      if (!(value instanceof Date)) {
-        throw "";
-      }
-      return format.dateTime(locale, value, { timeStyle: "short" });
+      return time(locale, replacement, parentValue);
     }
     case TYPE.select: {
-      if (typeof replacement != "string") {
-        throw "";
-      }
-      let option = element.options[replacement || "other"];
-      if (!option) {
-        option = element.options["other"];
-      }
-      let result = "";
-      for (const child of option.value) {
-        result += executeElement(
-          locale,
-          child,
-          replacements,
-          replacements?.[element.value]
-        );
-      }
-      return result;
+      const option = select(element, replacement);
+      return executeMany(
+        locale,
+        option.value,
+        replacements,
+        replacements?.[element.value]
+      );
     }
     case TYPE.plural: {
-      let option: MessageFormatElement[] = [];
-      if (element.pluralType === "ordinal") {
-        const rule =
-          typeof replacement === "number"
-            ? new Intl.PluralRules(locale, {
-                type: element.pluralType,
-              }).select(replacement)
-            : "other";
-        option = element.options[rule].value;
-      } else {
-        for (const rule of Object.keys(element.options)) {
-          if (rule === "other") {
-            option = element.options[rule].value;
-            break;
-          }
-          const match = /(<|<=|>=|>|=|!=)(\d+)/.exec(rule);
-          if (typeof replacement !== "number") {
-            throw "";
-          }
-          if (!match) {
-            continue;
-          }
-          const operation = {
-            "=": replacement === Number(match[2]),
-            "<=": replacement <= Number(match[2]),
-            "<": replacement < Number(match[2]),
-            ">=": replacement >= Number(match[2]),
-            ">": replacement > Number(match[2]),
-            "!=": replacement != Number(match[2]),
-          };
-          if (operation[match[1] as keyof typeof operation]) {
-            option = element.options[rule].value;
-            break;
-          }
-        }
-      }
-      let result = "";
-      for (const child of option) {
-        result += executeElement(
-          locale,
-          child,
-          replacements,
-          replacements?.[element.value]
-        );
-      }
-      return result;
+      const option = plural(locale, element, replacement);
+
+      return executeMany(
+        locale,
+        option.value,
+        replacements,
+        replacements?.[element.value]
+      );
     }
     case TYPE.pound: {
-      const value = parentValue || replacement;
-      if (typeof value === "number") {
-        return format.number(locale, value);
-      }
-      if (value instanceof Date) {
-        return format.dateTime(locale, value);
-      }
-      return value || "";
+      return pound(locale, replacement, parentValue);
     }
     case TYPE.tag: {
-      return "";
+      return executeMany(
+        locale,
+        element.children,
+        replacements,
+        replacements?.[element.value]
+      );
     }
   }
-};
+}
 
 export const parseMessage = (
   locale: string,

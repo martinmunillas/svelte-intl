@@ -1,5 +1,8 @@
 import type { GetICUArgs } from "@schummar/icu-type-parser";
 import { parseMessage, type Replacements } from "./parse";
+import { parseRichMessage } from "./render.svelte";
+import type { Snippet } from "svelte";
+import { browser } from "$app/environment";
 
 export type Format = {
   number: (n: number, options?: Intl.NumberFormatOptions) => string;
@@ -56,6 +59,21 @@ export const makeI18n = <
     }
     return parseMessage(locale, message, args as Replacements);
   };
+
+  t.rich = ((internal: unknown, key: string, args: Replacements) => {
+    return parseRichMessage(
+      internal,
+      browser ? () => translations : translations,
+      browser ? () => defaultLocale : defaultLocale,
+      browser ? () => locale : locale,
+      key,
+      // @ts-ignore
+      args
+    );
+  }) as unknown as (
+    key: string,
+    replacements: Replacements
+  ) => ReturnType<Snippet>;
 
   return {
     setLocale,

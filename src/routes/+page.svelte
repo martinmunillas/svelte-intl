@@ -1,5 +1,6 @@
 <script lang="ts">
   import { t, setLocale, type Locale, locale } from "$lib";
+  import type { Snippet } from "svelte";
 </script>
 
 <label>
@@ -15,11 +16,16 @@
   </select>
 </label>
 
+{#snippet link(content: Snippet)}
+  <a href="/asdfasdfasd">{@render content()}</a>
+{/snippet}
+
 <h1>{t("hello")}</h1>
 <p>
-  {t("select", {
+  {@render t.rich("select", {
     name: "Martin",
-    gender: "female",
+    gender: "male",
+    link: link,
   })}
 </p>
 <h2>{locale.current}</h2>
