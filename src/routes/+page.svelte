@@ -20,12 +20,17 @@
   <a href="/asdfasdfasd">{@render content()}</a>
 {/snippet}
 
+{#snippet bold(content: Snippet)}
+  <b>{@render content()}</b>
+{/snippet}
+
 <h1>{t("hello")}</h1>
 <p>
   {@render t.rich("select", {
     name: "Martin",
     gender: "male",
     link: link,
+    bold: bold,
   })}
 </p>
 <h2>{locale.current}</h2>
