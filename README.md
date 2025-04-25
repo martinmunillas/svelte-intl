@@ -87,7 +87,7 @@ Import the exported functions and state into your Svelte components.
   let gender = $state<"male" | "female" | "other">("male");
 
   // Snippet definition for rich text injection
-  // This snippet will be rendered inside the {link} placeholder in the ICU message
+  // This snippet will be rendered inside the <link></link> placeholder in the ICU message
   {#snippet link(content: Snippet)}
     <a href="/user/{name}" class="text-blue-600 hover:underline">
       {@render content()}
@@ -145,7 +145,7 @@ Import the exported functions and state into your Svelte components.
     - Call `setLocale("new-locale")` to change the application's language. The `t` function and `locale.current` will react automatically.
 4. Rich Text Translation (t.rich):
    - Define an ICU message in your translation file with placeholders for data and named placeholders for HTML content (e.g., `<link />`).
-   - In your Svelte component, define a {#snippet} with a name matching the placeholder in your ICU message (e.g., `{#snippet link(content: Snippet)}`). This snippet receives the text content designated for the link from the ICU message structure (e.g., the words "Click here" if your ICU was `Click <link>here</link>`). Correction based on user's example: The ICU string shown is more complex (`{gender, select, ... {link} ...}`), the snippet replaces the {link} part.
+   - In your Svelte component, define a {#snippet} with a name matching the placeholder in your ICU message (e.g., `{#snippet link(content: Snippet)}`). This snippet receives the text content designated for the link from the ICU message structure (e.g., the words "Click here" if your ICU was `Click <link>here</link>`). Correction based on user's example: The ICU string shown is more complex (`{gender, select, ... <link>...</link> ...}`), the snippet replaces the `<link>...</link>` part.
    - Call `{@render t.rich("key", { dataPlaceholder: value, snippetPlaceholderName: snippetName })}`. Pass regular data and the defined snippet itself as values in the options object. The library renders the translated string, injecting the rendered snippet into the appropriate placeholder.
 ## API
 - `makeI18n(translations: Record<string, Record<string, string>>, defaultLocale: string)`: Factory function to initialize the i18n system. Requires an object mapping locale codes to translation dictionaries and the initial locale code.
