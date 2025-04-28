@@ -1,8 +1,9 @@
-import type { GetICUArgs } from "@schummar/icu-type-parser";
 import { parseMessage, type Replacements } from "./parse";
 import { parseRichMessage } from "./render.svelte";
 import type { Snippet } from "svelte";
 import { browser } from "$app/environment";
+import type { GetICUArgs } from "@schummar/icu-type-parser";
+import type { GetICUTags } from "./types";
 
 export type Format = {
   number: (n: number, options?: Intl.NumberFormatOptions) => string;
@@ -70,9 +71,10 @@ export const makeI18n = <
       // @ts-ignore
       args
     );
-  }) as unknown as (
-    key: string,
-    replacements: Replacements
+  }) as unknown as <T extends TranslationKey>(
+    key: TranslationKey,
+    args?: GetICUArgs<Translations[T], GetICUArgsOptions> &
+      GetICUTags<Translations[T], Snippet<[Snippet]>>
   ) => ReturnType<Snippet>;
 
   return {

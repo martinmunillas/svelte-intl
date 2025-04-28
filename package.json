@@ -1,6 +1,5 @@
 {
-  "name": "svelte-translate",
-  "private": true,
+  "name": "@svelte-intl/svelte-intl",
   "version": "0.0.1",
   "type": "module",
   "scripts": {

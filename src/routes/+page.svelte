@@ -24,13 +24,13 @@
   <b>{@render content()}</b>
 {/snippet}
 
-<h1>{t("hello")}</h1>
+<h1>{t("select", {})}</h1>
 <p>
   {@render t.rich("select", {
     name: "Martin",
     gender: "male",
-    link: link,
-    bold: bold,
+    bold,
+    link,
   })}
 </p>
 <h2>{locale.current}</h2>
