@@ -1,19 +1,10 @@
 import { parseMessage, type Replacements } from "./parse";
-import { parseRichMessage } from "./render.svelte";
-import type { Snippet } from "svelte";
-import { browser } from "$app/environment";
+import { createRawSnippet, mount, unmount, type Snippet } from "svelte";
 import type { GetICUArgs } from "@schummar/icu-type-parser";
 import type { GetICUTags } from "./types";
-
-export type Format = {
-  number: (n: number, options?: Intl.NumberFormatOptions) => string;
-  dateTime: (dt: Date, options?: Intl.NumberFormatOptions) => string;
-  relativeDateTime: (
-    value: number,
-    unit: Intl.RelativeTimeFormatUnit,
-    options?: Intl.RelativeTimeFormatOptions
-  ) => string;
-};
+import RichMessage from "./RichMessage.svelte";
+import { format } from "./format";
+import type { AllTranslations, Locale, TranslationKey } from "./translations";
 
 type GetICUArgsOptions = {
   ICUNumberArgument: number;
@@ -21,13 +12,9 @@ type GetICUArgsOptions = {
   ICUArgument: string;
 };
 
-export const makeI18n = <
-  Locale extends string,
-  DefaultLocale extends Locale,
-  Translations extends Record<string, string>
->(
-  translations: Record<Locale, Translations>,
-  defaultLocale: DefaultLocale
+export const makeI18n = (
+  translations: Record<Locale, Record<string, string>>,
+  defaultLocale: Locale
 ) => {
   let locale = $state(defaultLocale as Locale);
 
@@ -35,20 +22,16 @@ export const makeI18n = <
     locale = l;
   };
 
-  type TranslationKey = Translations extends Record<infer S, string>
-    ? S
-    : string;
-
   const t = <T extends TranslationKey>(
-    key: TranslationKey,
-    args?: GetICUArgs<Translations[T], GetICUArgsOptions>
+    key: T,
+    args?: Required<GetICUArgs<AllTranslations[T], GetICUArgsOptions>>
   ) => {
     if (locale === "debug") return key;
 
     let message = translations[locale]?.[key] as string;
     if (!message) {
       console.warn(
-        `Translation with key "${key}" not found in locale "${locale}", fallling back to "${defaultLocale}"`
+        `Translation with key "${key}" not found in locale "${locale}", falling back to "${defaultLocale}"`
       );
       message = translations[defaultLocale][key];
       if (!message) {
@@ -61,20 +44,27 @@ export const makeI18n = <
     return parseMessage(locale, message, args as Replacements);
   };
 
-  t.rich = ((internal: unknown, key: string, args: Replacements) => {
-    return parseRichMessage(
-      internal,
-      browser ? () => translations : translations,
-      browser ? () => defaultLocale : defaultLocale,
-      browser ? () => locale : locale,
-      key,
-      // @ts-ignore
-      args
-    );
-  }) as unknown as <T extends TranslationKey>(
-    key: TranslationKey,
-    args?: GetICUArgs<Translations[T], GetICUArgsOptions> &
-      GetICUTags<Translations[T], Snippet<[Snippet]>>
+  t.rich = createRawSnippet((key: () => string, args: () => Replacements) => ({
+    render: () => `<div></div>`,
+    setup: (node) => {
+      const comp = mount(RichMessage, {
+        target: node,
+        props: {
+          defaultLocale,
+          locale,
+          key: key(),
+          replacements: args(),
+          translations,
+        },
+      });
+      return () => unmount(comp);
+    },
+  })) as unknown as <T extends TranslationKey>(
+    key: T,
+    args?: Required<
+      GetICUArgs<AllTranslations[T], GetICUArgsOptions> &
+        GetICUTags<AllTranslations[T], Snippet<[Snippet]>>
+    >
   ) => ReturnType<Snippet>;
 
   return {
@@ -86,8 +76,26 @@ export const makeI18n = <
       get list() {
         return Object.keys(translations);
       },
+      get listWithDebug() {
+        return Object.keys(translations).concat(["debug"]);
+      },
+
+      isValid(l: string): l is Locale {
+        return this.listWithDebug.includes(l);
+      },
     },
     t,
+    format: {
+      number: (n: number, options?: Intl.NumberFormatOptions) =>
+        format.number(locale, n, options),
+      dateTime: (dt: Date, options?: Intl.DateTimeFormatOptions) =>
+        format.dateTime(locale, dt, options),
+      relativeDateTime: (
+        value: number,
+        unit: Intl.RelativeTimeFormatUnit,
+        options?: Intl.RelativeTimeFormatOptions
+      ) => format.relativeDateTime(locale, value, unit, options),
+    },
   };
 };
 

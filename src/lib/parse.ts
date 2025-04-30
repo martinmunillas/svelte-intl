@@ -13,7 +13,9 @@ import { type Snippet, createRawSnippet } from "svelte";
 
 export type Replacement = string | number | Date | Snippet<[Snippet]>;
 export type Replacements = Record<string, Replacement>;
-
+const isEmpty = (value: unknown) => {
+  return value === undefined || value === null || value == "";
+};
 export const literal = (element: LiteralElement) => {
   return element.value;
 };
@@ -31,8 +33,11 @@ export const number = (
   parentValue?: Replacement
 ) => {
   const value = parentValue || replacement;
+  if (isEmpty(value)) {
+    return "";
+  }
   if (!(typeof value === "number")) {
-    throw "";
+    throw `Invalid type of replacement ${typeof value}, expected number`;
   }
   return format.number(locale, value);
 };
@@ -42,8 +47,11 @@ export const date = (
   parentValue?: Replacement
 ) => {
   const value = parentValue || replacement;
+  if (isEmpty(value)) {
+    return "";
+  }
   if (!(value instanceof Date)) {
-    throw "";
+    throw `Invalid type of replacement ${typeof value}, expected Date`;
   }
   return format.dateTime(locale, value);
 };
@@ -54,15 +62,18 @@ export const time = (
   parentValue?: Replacement
 ) => {
   const value = parentValue || replacement;
+  if (isEmpty(value)) {
+    return "";
+  }
   if (!(value instanceof Date)) {
-    throw "";
+    throw `Invalid type of replacement ${typeof value}, expected Date`;
   }
   return format.dateTime(locale, value, { timeStyle: "short" });
 };
 
 export const select = (element: SelectElement, replacement?: Replacement) => {
   if (typeof replacement != "string") {
-    throw "";
+    throw `Invalid type of replacement ${typeof replacement}, expected string`;
   }
   return element.options[replacement || "other"] || element.options["other"];
 };
@@ -89,7 +100,7 @@ export const plural = (
       }
       const match = /(<|<=|>=|>|=|!=)(\d+)/.exec(rule);
       if (typeof replacement !== "number") {
-        throw "";
+        throw `Invalid type of replacement ${typeof replacement}, expected number`;
       }
       if (!match) {
         continue;
@@ -109,7 +120,7 @@ export const plural = (
     }
   }
   if (!option) {
-    throw "";
+    throw `No option found`;
   }
   return option;
 };
@@ -167,6 +178,9 @@ function executeElement(
       return time(locale, replacement, parentValue);
     }
     case TYPE.select: {
+      if (isEmpty(replacement)) {
+        return "";
+      }
       const option = select(element, replacement);
       return executeMany(
         locale,
@@ -176,6 +190,9 @@ function executeElement(
       );
     }
     case TYPE.plural: {
+      if (isEmpty(replacement)) {
+        return "";
+      }
       const option = plural(locale, element, replacement);
 
       return executeMany(

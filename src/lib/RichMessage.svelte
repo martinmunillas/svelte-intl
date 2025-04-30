@@ -1,4 +1,4 @@
-<script module lang="ts">
+<script lang="ts">
   import {
     parse,
     TYPE,
@@ -18,8 +18,6 @@
     time,
   } from "./parse";
   import type { Snippet } from "svelte";
-
-  export { parseRichMessage };
 
   const getReplacementSnippet = (
     element: TagElement,
@@ -44,7 +42,7 @@
     let message = translations[locale]?.[key] as string;
     if (!message) {
       console.warn(
-        `Translation with key "${key}" not found in locale "${locale}", fallling back to "${defaultLocale}"`
+        `Translation with key "${key}" not found in locale "${locale}", falling back to "${defaultLocale}"`
       );
       message = translations[defaultLocale][key];
       if (!message) {
@@ -56,18 +54,25 @@
     }
     return message;
   };
+
+  type Props = {
+    translations: Translations;
+    locale: string;
+    defaultLocale: string;
+    key: string;
+    replacements: Replacements;
+  };
+
+  const { translations, locale, defaultLocale, key, replacements }: Props =
+    $props();
+
+  const message = $derived(
+    getMessage(translations, defaultLocale, locale, key)
+  );
 </script>
 
-{#snippet parseRichMessage(
-  translations: Translations,
-  defaultLocale: string,
-  locale: string,
-  key: string,
-  replacements: Replacements
-)}
-  {@const message = getMessage(translations, defaultLocale, locale, key)}
-  {@render executeManyRichElements(locale, parse(message), replacements)}
-{/snippet}
+{@render executeManyRichElements(locale, parse(message), replacements)}
+
 {#snippet executeManyRichElements(
   locale: string,
   elements: MessageFormatElement[],
