@@ -2,11 +2,14 @@ import {
   parse,
   TYPE,
   type ArgumentElement,
+  type DateElement,
   type LiteralElement,
   type MessageFormatElement,
+  type NumberElement,
   type PluralElement,
   type PluralOrSelectOption,
   type SelectElement,
+  type TimeElement,
 } from "@formatjs/icu-messageformat-parser";
 import { format } from "./format";
 import { type Snippet, createRawSnippet } from "svelte";
@@ -29,51 +32,66 @@ export const argument = (
 
 export const number = (
   locale: string,
+  element: NumberElement,
   replacement?: Replacement,
   parentValue?: Replacement
 ) => {
   const value = parentValue || replacement;
   if (isEmpty(value)) {
-    return "";
+    return element.value;
   }
-  if (!(typeof value === "number")) {
-    throw `Invalid type of replacement ${typeof value}, expected number`;
+  if (typeof value !== "number") {
+    console.warn(
+      `Invalid type of replacement ${typeof value} for "${element.value}", expected number`
+    );
+    return element.value;
   }
   return format.number(locale, value);
 };
 export const date = (
   locale: string,
+  element: DateElement,
   replacement?: Replacement,
   parentValue?: Replacement
 ) => {
   const value = parentValue || replacement;
   if (isEmpty(value)) {
-    return "";
+    return element.value;
   }
   if (!(value instanceof Date)) {
-    throw `Invalid type of replacement ${typeof value}, expected Date`;
+    console.warn(
+      `Invalid type of replacement ${typeof value} for "${element.value}", expected Date`
+    );
+    return element.value;
   }
   return format.dateTime(locale, value);
 };
 
 export const time = (
   locale: string,
+  element: TimeElement,
   replacement?: Replacement,
   parentValue?: Replacement
 ) => {
   const value = parentValue || replacement;
   if (isEmpty(value)) {
-    return "";
+    return element.value;
   }
   if (!(value instanceof Date)) {
-    throw `Invalid type of replacement ${typeof value}, expected Date`;
+    console.warn(
+      `Invalid type of replacement ${typeof value} for "${element.value}", expected Date`
+    );
+    return element.value;
   }
   return format.dateTime(locale, value, { timeStyle: "short" });
 };
 
 export const select = (element: SelectElement, replacement?: Replacement) => {
   if (typeof replacement != "string") {
-    throw `Invalid type of replacement ${typeof replacement}, expected string`;
+    console.warn(
+      `Invalid type of replacement ${typeof replacement} for "${element.value}", expected string`
+    );
+    return element.options["other"];
   }
   return element.options[replacement || "other"] || element.options["other"];
 };
@@ -100,7 +118,10 @@ export const plural = (
       }
       const match = /(<|<=|>=|>|=|!=)(\d+)/.exec(rule);
       if (typeof replacement !== "number") {
-        throw `Invalid type of replacement ${typeof replacement}, expected number`;
+        console.warn(
+          `Invalid type of replacement ${typeof replacement} for "${element.value}", expected number`
+        );
+        return element.options["other"];
       }
       if (!match) {
         continue;
@@ -169,13 +190,13 @@ function executeElement(
       return argument(element, replacement);
     }
     case TYPE.number: {
-      return number(locale, replacement, parentValue);
+      return number(locale, element, replacement, parentValue);
     }
     case TYPE.date: {
-      return date(locale, replacement, parentValue);
+      return date(locale, element, replacement, parentValue);
     }
     case TYPE.time: {
-      return time(locale, replacement, parentValue);
+      return time(locale, element, replacement, parentValue);
     }
     case TYPE.select: {
       if (isEmpty(replacement)) {

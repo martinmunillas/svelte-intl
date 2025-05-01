@@ -98,11 +98,11 @@
   {:else if element.type === TYPE.argument}
     {argument(element, replacement)}
   {:else if element.type === TYPE.number}
-    {number(locale, replacement, parentValue)}
+    {number(locale, element, replacement, parentValue)}
   {:else if element.type === TYPE.date}
-    {date(locale, replacement, parentValue)}
+    {date(locale, element, replacement, parentValue)}
   {:else if element.type === TYPE.time}
-    {time(locale, replacement, parentValue)}
+    {time(locale, element, replacement, parentValue)}
   {:else if element.type === TYPE.select}
     {@const option = select(element, replacement)}
 

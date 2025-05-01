@@ -48,22 +48,22 @@ export function svelteIntl(options: SvelteIntlPluginOptions) {
 function generateTypes(options: SvelteIntlPluginOptions, pwd: string) {
   let generated = `// Auto-generated from ${options.localesDir}
 `;
-  const localesTypes: string[] = [];
   const localesTags: string[] = [];
   try {
     const locales = readdirSync(path.join(options.localesDir), "utf-8");
     for (const filename of locales) {
       const localeTag = filename.split(".")[0];
       localesTags.push(localeTag);
-      const locale = pascalCase(localeTag);
+
       const content = readFileSync(
         path.join(pwd, options.localesDir, filename),
         "utf-8"
       );
-      localesTypes.push(pascalCase(locale));
-      generated += `  export type ${locale} = ${content}
+      generated += `const ${snake(localeTag)} = ${JSON.stringify(JSON.parse(content), null, 2)} as const;\n`;
+      generated += `  export type ${pascalCase(localeTag)} = typeof ${snake(localeTag)}
       `;
     }
+    const localesTypes = localesTags.map((t) => pascalCase(t));
     const typeUnion = localesTypes.join(" | ");
     generated += `
     
@@ -76,7 +76,6 @@ export type TranslationKey = Exclude<keyof (${typeUnion}), "$schema">;
 export type Translation = (${typeUnion})[TranslationKey];
 
 import { makeI18n } from './i18n.svelte'
-${localesTags.map((t) => `import ${snake(t)} from "${path.join("../../", options.localesDir, `${t}.json`)}"`).join("\n")}
 
 const { t, format, locale, setLocale } = makeI18n({
   ${localesTags.map((t) => `"${t}": ${snake(t)}`).join(",\n")}

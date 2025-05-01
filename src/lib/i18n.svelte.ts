@@ -47,23 +47,28 @@ export const makeI18n = (
   t.rich = createRawSnippet((key: () => string, args: () => Replacements) => ({
     render: () => `<div></div>`,
     setup: (node) => {
-      const comp = mount(RichMessage, {
-        target: node,
-        props: {
-          defaultLocale,
-          locale,
-          key: key(),
-          replacements: args(),
-          translations,
-        },
+      $effect(() => {
+        const comp = mount(RichMessage, {
+          target: node,
+          props: {
+            defaultLocale,
+            locale,
+            key: key(),
+            replacements: args(),
+            translations,
+          },
+        });
+        return () => unmount(comp);
       });
-      return () => unmount(comp);
     },
   })) as unknown as <T extends TranslationKey>(
     key: T,
     args?: Required<
       GetICUArgs<AllTranslations[T], GetICUArgsOptions> &
-        GetICUTags<AllTranslations[T], Snippet<[Snippet]>>
+        GetICUTags<
+          AllTranslations[T],
+          (content: Snippet) => ReturnType<Snippet>
+        >
     >
   ) => ReturnType<Snippet>;
 
