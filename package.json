@@ -2,6 +2,8 @@
   "name": "@svelte-intl/svelte-intl",
   "version": "0.2.0",
   "type": "module",
+  "svelte": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "dev": "vite dev",
     "build": "vite build && npm run prepack",
@@ -12,23 +14,6 @@
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "test": "vitest"
   },
-  "files": [
-    "dist"
-  ],
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "svelte": "./dist/index.js",
-      "default": "./dist/index.js"
-    },
-    "./vite": {
-      "types": "./dist/vite/plugin.d.ts",
-      "svelte": "./dist/vite/plugin.js",
-      "default": "./dist/vite/plugin.js"
-    }
-  },
-  "svelte": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "devDependencies": {
     "@sveltejs/adapter-auto": "^6.0.0",
     "@sveltejs/kit": "^2.16.0",
@@ -50,5 +35,23 @@
     "@formatjs/icu-messageformat-parser": "^2.11.2",
     "@schummar/icu-type-parser": "^1.22.2",
     "@types/node": "^22.15.3"
+  },
+  "peerDependencies": {
+    "svelte": "^5.23.2"
+  },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./vite": {
+      "types": "./dist/vite/plugin.d.ts",
+      "svelte": "./dist/vite/plugin.js",
+      "default": "./dist/vite/plugin.js"
+    }
   }
 }

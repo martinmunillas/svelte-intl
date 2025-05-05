@@ -18,17 +18,19 @@ export function svelteIntl(options: SvelteIntlPluginOptions) {
   if (!process.env.PWD) {
     throw `Unable to locate working directory, process.env.PWD with a value of "${process.env.PWD}"`;
   }
+  const pwd = process.env.PWD!;
 
-  const pwd = process.env.PWD;
   const configureServer = (server: { watcher: FSWatcher }) => {
-    server.watcher.add(options.localesDir);
+    const dir = path.join(pwd, options.localesDir);
+    server.watcher.add(dir);
 
     const localeFiles = readdirSync(options.localesDir, "utf-8");
     for (const localeFile of localeFiles) {
-      server.watcher.add(path.join(options.localesDir, localeFile));
+      server.watcher.add(path.join(dir, localeFile));
     }
     server.watcher.on("change", (changedPath) => {
-      if (changedPath === path.resolve(options.localesDir)) {
+      if (changedPath.startsWith(dir)) {
+        console.log("changedPath :>> ", changedPath);
         generateTypes(options, pwd);
       }
     });
@@ -47,6 +49,10 @@ export function svelteIntl(options: SvelteIntlPluginOptions) {
 
 function generateTypes(options: SvelteIntlPluginOptions, pwd: string) {
   let generated = `// Auto-generated from ${options.localesDir}
+export {}
+
+declare global {
+  namespace I18n {
 `;
   const localesTags: string[] = [];
   try {
@@ -59,54 +65,32 @@ function generateTypes(options: SvelteIntlPluginOptions, pwd: string) {
         path.join(pwd, options.localesDir, filename),
         "utf-8"
       );
-      generated += `const ${snake(localeTag)} = ${JSON.stringify(JSON.parse(content), null, 2)} as const;\n`;
-      generated += `  export type ${pascalCase(localeTag)} = typeof ${snake(localeTag)}
-      `;
+      generated += `type ${pascalCase(localeTag)} = ${JSON.stringify(JSON.parse(content), null, 2)};\n`;
     }
     const localesTypes = localesTags.map((t) => pascalCase(t));
     const typeUnion = localesTypes.join(" | ");
     generated += `
     
-export type AllTranslations = ${localesTypes.join("|")}
-export type LocaleTranslations = {
-  ${localesTags.map((t, i) => `"${t}": ${localesTypes[i]}`).join("\n")}
+    export type AllTranslations = ${localesTypes.join("|")}
+    export type LocaleTranslations = {
+      ${localesTags.map((t, i) => `"${t}": ${localesTypes[i]}`).join("\n")}
+    }
+    export type Locale = ${localesTags.map((t) => `"${t}"`).join(" | ")}
+    export type TranslationKey = Exclude<keyof (${pascalCase(options.defaultLocale)}), "$schema">;
+    export type Translation = (${typeUnion})[TranslationKey];
+  }
 }
-export type Locale = ${localesTags.map((t) => `"${t}"`).join(" | ")}
-export type TranslationKey = Exclude<keyof (${typeUnion}), "$schema">;
-export type Translation = (${typeUnion})[TranslationKey];
-
-import { makeI18n } from './i18n.svelte'
-
-const { t, format, locale, setLocale } = makeI18n({
-  ${localesTags.map((t) => `"${t}": ${snake(t)}`).join(",\n")}
-}, "${options.defaultLocale}");
-export { t, format, locale, setLocale };
 `;
-    const outputDir = path.join(
-      pwd,
-      "node_modules",
-      "@svelte-intl/svelte-intl/dist"
-    );
+    const outputDir = path.join(pwd, ".svelte-kit/svelte-intl");
 
     if (!existsSync(outputDir)) {
       mkdirSync(outputDir, { recursive: true });
     }
 
-    try {
-      unlinkSync(path.join(outputDir, "translations.d.ts"));
-      unlinkSync(path.join(outputDir, "translations.js"));
-    } catch (error) {}
-    writeFileSync(path.join(outputDir, "translations.ts"), generated);
+    writeFileSync(path.join(outputDir, "i18n.d.ts"), generated);
   } catch (error) {
     console.error("Error generating types:", error);
   }
-}
-
-function snake(str: string) {
-  str = str.trim();
-  str = str.replace(/[\s\.-]+/g, "_");
-  str = str.toLowerCase();
-  return str;
 }
 
 function pascalCase(str: string): string {

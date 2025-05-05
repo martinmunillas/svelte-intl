@@ -4,7 +4,6 @@ import type { GetICUArgs } from "@schummar/icu-type-parser";
 import type { GetICUTags } from "./types";
 import RichMessage from "./RichMessage.svelte";
 import { format } from "./format";
-import type { AllTranslations, Locale, TranslationKey } from "./translations";
 
 type GetICUArgsOptions = {
   ICUNumberArgument: number;
@@ -13,18 +12,18 @@ type GetICUArgsOptions = {
 };
 
 export const makeI18n = (
-  translations: Record<Locale, Record<string, string>>,
-  defaultLocale: Locale
+  translations: Record<I18n.Locale, Record<string, string>>,
+  defaultLocale: I18n.Locale
 ) => {
-  let locale = $state(defaultLocale as Locale);
+  let locale = $state(defaultLocale as I18n.Locale);
 
-  const setLocale = (l: Locale) => {
+  const setLocale = (l: I18n.Locale) => {
     locale = l;
   };
 
-  const t = <T extends TranslationKey>(
+  const t = <T extends I18n.TranslationKey>(
     key: T,
-    args?: Required<GetICUArgs<AllTranslations[T], GetICUArgsOptions>>
+    args?: Required<GetICUArgs<I18n.AllTranslations[T], GetICUArgsOptions>>
   ) => {
     if (locale === "debug") return key;
 
@@ -61,12 +60,12 @@ export const makeI18n = (
         return () => unmount(comp);
       });
     },
-  })) as unknown as <T extends TranslationKey>(
+  })) as unknown as <T extends I18n.TranslationKey>(
     key: T,
     args?: Required<
-      GetICUArgs<AllTranslations[T], GetICUArgsOptions> &
+      GetICUArgs<I18n.AllTranslations[T], GetICUArgsOptions> &
         GetICUTags<
-          AllTranslations[T],
+          I18n.AllTranslations[T],
           (content: Snippet) => ReturnType<Snippet>
         >
     >
@@ -85,7 +84,7 @@ export const makeI18n = (
         return Object.keys(translations).concat(["debug"]);
       },
 
-      isValid(l: string): l is Locale {
+      isValid(l: string): l is I18n.Locale {
         return this.listWithDebug.includes(l);
       },
     },

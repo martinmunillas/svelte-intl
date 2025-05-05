@@ -1,13 +1,13 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
-  import { locale, setLocale, type Locale, t } from "$lib";
+  import { locale, setLocale, t } from "./i18n";
 </script>
 
 <label>
   Locale
   <select
     onchange={(e) => {
-      setLocale((e.target as HTMLSelectElement)?.value as Locale);
+      setLocale((e.target as HTMLSelectElement)?.value as I18n.Locale);
     }}
   >
     {#each locale.list as l}
