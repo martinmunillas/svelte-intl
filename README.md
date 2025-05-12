@@ -26,16 +26,16 @@ yarn add @svelte-intl/svelte-intl
     * `src/lib/translations/en-us.json`:
         ```json
         {
-          "hello": "Hello world!",
-          "select": "{name}, Click to see <link>{gender, select, male {his} female {her} other {their}} profile</link>.",
+          "hello": "Hello!",
+          "seeProfile": "{name}, Click to see <link>{gender, select, male {his} female {her} other {their}} profile</link>.",
           // ... other messages
         };
         ```
 
-    * `src/lib/translations/es-la.ts`:
-        ```typescript
+    * `src/lib/translations/es-la.json`:
+        ```json
         {
-          "hello": "¡Hola Mundo!",
+          "hello": "¡Hola!",
           "seeProfile": "{name}, Haz clic para ver <link>su perfil</link>",
           // ... other messages
         };
@@ -46,30 +46,37 @@ yarn add @svelte-intl/svelte-intl
 
     * `src/lib/i18n/index.ts`:
         ```typescript
-        import en_us from "../translations/en-us";
-        import es_la from "../translations/es-la";
-        // Assuming makeI18n is defined in './i18n.svelte.ts' or similar
-        import { makeI18n, type GetLocaleType } from "./i18n.svelte";
+        import enUs from "../translations/en-us.json";
+        import esLa from "../translations/es-la.json";
+       
+        import { makeI18n } from "./i18n.svelte";
 
-        // Define the available translation dictionaries
-        const translations = {
+        const { t, setLocale, locale, format } = makeI18n({
           "en-us": en_us,
           "es-la": es_la,
-        };
+        }, "en-us");
 
-        // Initialize i18n with the translations and a default locale
-        const i18n = makeI18n(translations, "en-us");
-
-        // Derive the Locale type for type safety
-        export type Locale = GetLocaleType<typeof i18n>;
-
-        // Extract the reactive functions and state
-        const { t, setLocale, locale } = i18n;
-
-        // Export for use in components
-        export { t, setLocale, locale };
+        export { t, setLocale, locale, format };
         ```
+    * `vite.config.(ts|js)`
+      ```typescript
+      // ...
+      import { svelteIntl } from '@svelte-intl/svelte-intl/vite';
+      
 
+      export default defineConfig(({ mode }) => {
+        return {
+          plugins: [
+            // ...
+            svelteIntl({
+              localesDir: './messages',
+              defaultLocale: 'en-us',
+            }),
+          ],
+          // ...
+        }
+      })
+      ```
 ## Usage
 
 Import the exported functions and state into your Svelte components.
