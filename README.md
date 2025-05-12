@@ -3,22 +3,19 @@ A straightforward internationalization (i18n) library for Svelte 5, leveraging R
 
 ## Features
 * **Svelte 5 Runes:** Built with Svelte 5's reactive primitives (`$state`, `$derived`).
-* **ICU Message Format:** Supports complex translations including plurals, gender, selects, etc.
-* **Type Safety:** Automatically derives a `Locale` type based on your provided translations.
+* **ICU Message Format:** Supports complex translations including plurals, selects, dates, numbers, etc.
+* **Type Safety:** Automatically generates a types based on your provided translations.
 * **Simple API:** Easy-to-use functions (`t`, `setLocale`) and reactive state (`locale`).
 * **Rich Text Translation:** Integrates seamlessly with Svelte Snippets for embedding complex HTML within translations.
 
 ## Installation
-As this is likely a local library within your project and the setup file (e.g., `i18n/index.ts`) inside your `$lib` directory.
-
-```
-src/
-└── lib/
-├── i18n/
-│   └── index.ts        # Your setup code (as provided)
-└── translations/
-├── en-us.ts        # English translations
-└── es-la.ts        # Spanish translations
+Install with NPM
+```bash
+npm i @svelte-intl/svelte-intl
+``` 
+Install with Yarn
+```bash
+yarn add @svelte-intl/svelte-intl
 ```
 
 ## Setup
@@ -26,20 +23,20 @@ src/
 1.  **Create Translation Files:**
     Define your messages using ICU syntax in separate files per locale.
 
-    * `src/lib/translations/en-us.ts`:
-        ```typescript
-        export default {
-          hello: "Hello world!",
-          select: "{name}, Click to see <link>{gender, select, male {his} female {her} other {their}} profile</link>.",
+    * `src/lib/translations/en-us.json`:
+        ```json
+        {
+          "hello": "Hello world!",
+          "select": "{name}, Click to see <link>{gender, select, male {his} female {her} other {their}} profile</link>.",
           // ... other messages
         };
         ```
 
     * `src/lib/translations/es-la.ts`:
         ```typescript
-        export default {
-          hello: "¡Hola Mundo!",
-          seeProfile: "{name}, Haz clic para ver <link>su perfil</link>",
+        {
+          "hello": "¡Hola Mundo!",
+          "seeProfile": "{name}, Haz clic para ver <link>su perfil</link>",
           // ... other messages
         };
         ```
