@@ -3,7 +3,6 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
-  unlinkSync,
   writeFileSync,
 } from "fs";
 import path from "path";

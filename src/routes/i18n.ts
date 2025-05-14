@@ -1,6 +1,6 @@
 import { makeI18n } from "$lib";
-import esLa from "../translations/es-la";
-import enUs from "../translations/en-us";
+import esLa from "../translations/es-la.json";
+import enUs from "../translations/en-us.json";
 
 const { t, setLocale, format, locale } = makeI18n(
   {

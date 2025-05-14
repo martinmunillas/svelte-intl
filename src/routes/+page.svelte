@@ -3,6 +3,9 @@
   import { locale, setLocale, t } from "./i18n";
 </script>
 
+<h1>Svelte-Intl</h1>
+<h2>Locale: {locale.current}</h2>
+
 <label>
   Locale
   <select
@@ -38,4 +41,32 @@
     bold,
   })}
 </p>
-<h2>{locale.current}</h2>
+
+<p>
+  {t("assetsSelected", {
+    assets: 1,
+  })}
+</p>
+<p>
+  {t("assetsSelected", {
+    assets: 5,
+  })}
+</p>
+
+<p>
+  {t("filters", {
+    filters: 5,
+  })}
+</p>
+
+<p>
+  {t("filters", {
+    filters: 0,
+  })}
+</p>
+
+<p>
+  {t("filters", {
+    filters: 1,
+  })}
+</p>

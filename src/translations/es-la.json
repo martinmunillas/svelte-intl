@@ -1,0 +1,5 @@
+{
+  "hello": "hola",
+  "select": "{name}, {gender, select, female {Ella} male {El} other {El}} esta <link>en <bold>linea</bold></link>.",
+  "assetsSelected": "Tienes {assets, plural, =1 {un activo seleccionado} other {# activos seleccionados}}"
+}
