@@ -29,7 +29,6 @@ export function svelteIntl(options: SvelteIntlPluginOptions) {
     }
     server.watcher.on("change", (changedPath) => {
       if (changedPath.startsWith(dir)) {
-        console.log("changedPath :>> ", changedPath);
         generateTypes(options, pwd);
       }
     });

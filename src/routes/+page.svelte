@@ -43,30 +43,7 @@
 </p>
 
 <p>
-  {t("assetsSelected", {
-    assets: 1,
-  })}
-</p>
-<p>
-  {t("assetsSelected", {
-    assets: 5,
-  })}
-</p>
-
-<p>
-  {t("filters", {
-    filters: 5,
-  })}
-</p>
-
-<p>
   {t("filters", {
     filters: 0,
-  })}
-</p>
-
-<p>
-  {t("filters", {
-    filters: 1,
   })}
 </p>

@@ -17,7 +17,7 @@ import { type Snippet, createRawSnippet } from "svelte";
 export type Replacement = string | number | Date | Snippet<[Snippet]>;
 export type Replacements = Record<string, Replacement>;
 const isEmpty = (value: unknown) => {
-  return value === undefined || value === null || value == "";
+  return value === undefined || value === null || value === "";
 };
 export const literal = (element: LiteralElement) => {
   return element.value;
@@ -27,7 +27,7 @@ export const argument = (
   element: ArgumentElement,
   replacement?: Replacement
 ) => {
-  return replacement?.toString() || element.value;
+  return replacement?.toString() ?? element.value;
 };
 
 export const number = (
@@ -36,7 +36,7 @@ export const number = (
   replacement?: Replacement,
   parentValue?: Replacement
 ) => {
-  const value = parentValue || replacement;
+  const value = parentValue ?? replacement;
   if (isEmpty(value)) {
     return element.value;
   }
@@ -54,7 +54,7 @@ export const date = (
   replacement?: Replacement,
   parentValue?: Replacement
 ) => {
-  const value = parentValue || replacement;
+  const value = parentValue ?? replacement;
   if (isEmpty(value)) {
     return element.value;
   }
@@ -73,7 +73,7 @@ export const time = (
   replacement?: Replacement,
   parentValue?: Replacement
 ) => {
-  const value = parentValue || replacement;
+  const value = parentValue ?? replacement;
   if (isEmpty(value)) {
     return element.value;
   }
@@ -93,7 +93,7 @@ export const select = (element: SelectElement, replacement?: Replacement) => {
     );
     return element.options["other"];
   }
-  return element.options[replacement || "other"] || element.options["other"];
+  return element.options[replacement || "other"] ?? element.options["other"];
 };
 
 export const plural = (
@@ -151,14 +151,14 @@ export const pound = (
   replacement?: Replacement,
   parentValue?: Replacement
 ) => {
-  const value = parentValue || replacement;
+  const value = parentValue ?? replacement;
   if (typeof value === "number") {
     return format.number(locale, value);
   }
   if (value instanceof Date) {
     return format.dateTime(locale, value);
   }
-  return value?.toString() || "";
+  return value?.toString() ?? "";
 };
 
 const executeMany = (
