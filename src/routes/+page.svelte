@@ -44,6 +44,6 @@
 
 <p>
   {t("filters", {
-    filters: 0,
+    filters: undefined,
   })}
 </p>
