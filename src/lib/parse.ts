@@ -112,8 +112,6 @@ export const plural = (
         : "other";
     option = element.options[rule];
   } else {
-    console.log("replacement :>> ", replacement);
-    console.log("element :>> ", element);
     if (typeof replacement !== "number") {
       console.warn(
         `Invalid type of replacement ${typeof replacement} for "${element.value}", expected number`
