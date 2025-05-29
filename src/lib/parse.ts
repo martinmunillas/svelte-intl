@@ -241,9 +241,16 @@ export const parseMessage = (
   replacements?: Replacements
 ) => {
   let result = "";
-  const elements = parse(message);
-  for (const element of elements) {
-    result += executeElement(locale, element, replacements);
+  try {
+    const elements = parse(message);
+    for (const element of elements) {
+      result += executeElement(locale, element, replacements);
+    }
+    return result;
+  } catch (error) {
+    console.error(
+      `Invalid format for message "${message}" in locale "${locale}": ${(error as Error).message}`
+    );
+    return "";
   }
-  return result;
 };

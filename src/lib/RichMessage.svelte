@@ -54,7 +54,6 @@
     }
     return message;
   };
-
   type Props = {
     translations: Translations;
     locale: string;
@@ -69,9 +68,20 @@
   const message = $derived(
     getMessage(translations, defaultLocale, locale, key)
   );
+
+  const parseMessage = (message: string) => {
+    try {
+      return parse(message);
+    } catch (error) {
+      console.error(
+        `Invalid format for message "${message}" in locale "${locale}": ${(error as Error).message}`
+      );
+      return [];
+    }
+  };
 </script>
 
-{@render executeManyRichElements(locale, parse(message), replacements)}
+{@render executeManyRichElements(locale, parseMessage(message), replacements)}
 
 {#snippet executeManyRichElements(
   locale: string,
