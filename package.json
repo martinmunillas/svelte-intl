@@ -52,6 +52,11 @@
       "types": "./dist/vite/plugin.d.ts",
       "svelte": "./dist/vite/plugin.js",
       "default": "./dist/vite/plugin.js"
+    },
+    "./testing": {
+      "types": "./dist/testing.d.ts",
+      "svelte": "./dist/testing.js",
+      "default": "./dist/testing.js"
     }
   }
 }
