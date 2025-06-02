@@ -136,9 +136,9 @@ export const plural = (
         ">": replacement > Number(match[2]),
         "!=": replacement != Number(match[2]),
       };
+
       if (operation[match[1] as keyof typeof operation]) {
-        option = element.options[rule];
-        break;
+        return element.options[rule];
       }
     }
 

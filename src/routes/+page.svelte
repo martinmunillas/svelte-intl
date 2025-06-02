@@ -47,3 +47,9 @@
     filters: undefined,
   })}
 </p>
+
+<p>
+  {t("flows", {
+    count: 1,
+  })}
+</p>
