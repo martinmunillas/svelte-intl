@@ -49,7 +49,8 @@
 </p>
 
 <p>
-  {t("flows", {
-    count: 1,
+  {@render t.rich("nestedPound", {
+    number: 3,
+    b: bold,
   })}
 </p>

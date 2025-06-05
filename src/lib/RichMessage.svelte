@@ -22,9 +22,12 @@
   const getReplacementSnippet = (
     element: TagElement,
     replacement?: Replacement
-  ): Snippet<[Snippet]> => {
+  ): Snippet<[Snippet]> | undefined => {
     if (typeof replacement !== "function") {
-      throw `Replacement for ${element.value} should be of type Snippet but got ${typeof replacement} instead`;
+      console.warn(
+        `Replacement for ${element.value} should be of type Snippet but got ${typeof replacement} instead`
+      );
+      return undefined;
     }
 
     return replacement;
@@ -140,9 +143,13 @@
         locale,
         element.children,
         replacements,
-        replacements?.[element.value]
+        parentValue ?? replacement
       )}
     {/snippet}
-    {@render replacementSnippet(snippetChildren)}
+    {#if replacementSnippet}
+      {@render replacementSnippet(snippetChildren)}
+    {:else}
+      {@render snippetChildren()}
+    {/if}
   {/if}
 {/snippet}

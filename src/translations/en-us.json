@@ -3,5 +3,6 @@
   "select": "{name}, {gender, select, female {She is} other {They are}} <link>online</link>.",
   "assetsSelected": "You have {assets, plural, =1 {1 asset} other {# assets}} selected",
   "filters": "{filters, plural, =0 {No filters applied} =1 {1 filter applied} other {# filters applied}}",
-  "flows": "Displaying {count, plural, =1 {1 flow} other {# flows}}"
+  "flows": "Displaying {count, plural, =1 {1 flow} other {# flows}}",
+  "nestedPound": "Displaying {number, plural, =1 {<b>1 location</b> that has} other {<b># locations</b> that have}} assets"
 }
