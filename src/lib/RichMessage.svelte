@@ -89,8 +89,8 @@
 {#snippet executeManyRichElements(
   locale: string,
   elements: MessageFormatElement[],
-  replacements?: Replacements,
-  parentValue?: Replacement
+  replacements: Replacements = undefined,
+  parentValue: Replacement = undefined
 )}
   {#each elements as element}
     {@render executeRichElement(locale, element, replacements, parentValue)}
@@ -99,8 +99,8 @@
 {#snippet executeRichElement(
   locale: string,
   element: MessageFormatElement,
-  replacements?: Replacements,
-  parentValue?: Replacement
+  replacements: Replacements = undefined,
+  parentValue: Replacement = undefined
 )}
   {@const replacement =
     // @ts-ignore
